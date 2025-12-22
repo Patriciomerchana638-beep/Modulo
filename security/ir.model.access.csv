@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bordado_orden,access_bordado_orden,model_bordado_orden,base.group_user,1,1,1,1
+access_bordado_incidencia,access_bordado_incidencia,model_bordado_incidencia,base.group_user,1,1,1,1

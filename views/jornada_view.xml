@@ -1,0 +1,18 @@
+<odoo>
+  <data>
+    <record id="action_server_asistencia_rapida" model="ir.actions.server">
+        <field name="name">Registrar Asistencia</field>
+        <field name="model_id" ref="hr_attendance.model_hr_attendance"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.registrar_asistencia_rapida()
+        </field>
+    </record>
+
+    <menuitem id="menu_asistencia_btn" 
+              name="🛑 MARCAR ENTRADA / SALIDA" 
+              parent="menu_bordado_root" 
+              action="action_server_asistencia_rapida" 
+              sequence="1"/>
+  </data>
+</odoo>
