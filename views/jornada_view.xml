@@ -1,18 +1,87 @@
 <odoo>
   <data>
-    <record id="action_server_asistencia_rapida" model="ir.actions.server">
-        <field name="name">Registrar Asistencia</field>
-        <field name="model_id" ref="hr_attendance.model_hr_attendance"/>
-        <field name="state">code</field>
-        <field name="code">
-            action = model.registrar_asistencia_rapida()
+    <record id="view_bordado_control_asistencia_form" model="ir.ui.view">
+        <field name="name">bordado.control.asistencia.form</field>
+        <field name="model">bordado.control.asistencia</field>
+        <field name="arch" type="xml">
+            <form string="Control de Asistencia" create="false" edit="false" delete="false">
+                <sheet>
+                    <div class="text-center" style="margin-top: 20px; margin-bottom: 20px;">
+                        <field name="foto" widget="image" class="oe_avatar" style="width: 120px; height: 120px; border-radius: 50%;"/>
+                        <h1>Hola, <field name="nombre_empleado" readonly="1"/></h1>
+                    </div>
+
+                    <div invisible="esta_trabajando" class="alert alert-secondary text-center" role="alert">
+                        <h3>⚪ Actualmente estás FUERA de tu jornada laboral.</h3>
+                        <p>Presiona el botón verde para desbloquear el sistema.</p>
+                    </div>
+
+                    <div invisible="not esta_trabajando" class="alert alert-success text-center" role="alert">
+                        <h3>🟢 JORNADA ACTIVA</h3>
+                        <p>Hora de entrada: <strong><field name="hora_entrada" readonly="1"/></strong></p>
+                        <h1>⏱️ <field name="horas_trabajadas" readonly="1"/></h1>
+                    </div>
+                    
+                    <hr invisible="not esta_trabajando"/>
+
+                    <div invisible="not esta_trabajando" style="margin-top: 20px; margin-bottom: 40px;">
+                        <h2 class="text-center" style="color: #555;">📂 ¿Qué deseas hacer hoy?</h2>
+                        <br/>
+                        <div class="row">
+                            <div class="col-6 text-center">
+                                <button name="%(bordado_app.action_bordado_orden)d" 
+                                        type="action" 
+                                        string="🧵 Ver Órdenes de Trabajo" 
+                                        class="btn-primary"
+                                        style="width: 90%; height: 100px; font-size: 20px; border-radius: 10px;"/>
+                            </div>
+
+                            <div class="col-6 text-center">
+                                <button name="%(bordado_app.action_incidencia)d" 
+                                        type="action" 
+                                        string="⚠️ Historial de Fallas" 
+                                        class="btn-warning"
+                                        style="width: 90%; height: 100px; font-size: 20px; border-radius: 10px; color: black;"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr/>
+
+                    <group>
+                        <button name="action_iniciar_jornada" 
+                                string="🚀 INICIAR JORNADA" 
+                                type="object" 
+                                class="btn-success btn-lg btn-block" 
+                                style="width: 100%; height: 80px; font-size: 25px;" 
+                                invisible="esta_trabajando"/>
+                                
+                        <button name="action_finalizar_jornada" 
+                                string="🛑 FINALIZAR JORNADA" 
+                                type="object" 
+                                class="btn-danger btn-lg btn-block" 
+                                style="width: 100%; height: 60px; font-size: 20px;" 
+                                invisible="not esta_trabajando" 
+                                confirm="⚠️ ¿Seguro que quieres cerrar tu jornada? Se ocultarán las órdenes."/>
+                    </group>
+                </sheet>
+            </form>
         </field>
     </record>
 
-    <menuitem id="menu_asistencia_btn" 
-              name="🛑 MARCAR ENTRADA / SALIDA" 
+   <record id="action_control_asistencia" model="ir.actions.act_window">
+        <field name="name">⏱️ Reloj</field>
+        <field name="res_model">bordado.control.asistencia</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'create': True}</field>
+    </record>
+
+    <menuitem id="menu_asistencia_dashboard_v2" 
+              name="🕒 Control de Asistencia" 
               parent="menu_bordado_root" 
-              action="action_server_asistencia_rapida" 
+              action="action_control_asistencia" 
               sequence="1"/>
+
   </data>
 </odoo>

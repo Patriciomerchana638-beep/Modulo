@@ -1,0 +1,19 @@
+<odoo>
+    <data noupdate="1">
+        <record id="ir_cron_reporte_semanal_asistencia" model="ir.cron">
+            <field name="name">Enviar Reporte Semanal de Asistencia</field>
+            
+            <field name="model_id" ref="hr.model_hr_employee"/>
+            
+            <field name="state">code</field>
+            <field name="code">model.action_enviar_reporte_semanal_asistencia()</field>
+            
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+            
+            <field name="nextcall" eval="'2026-01-24 19:00:00'"/> 
+            
+            <field name="priority">5</field>
+        </record>
+    </data>
+</odoo>

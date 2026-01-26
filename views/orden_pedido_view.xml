@@ -1,31 +1,166 @@
 <odoo>
   <data>
+
     <record id="view_bordado_orden_form" model="ir.ui.view">
         <field name="name">bordado.orden.form</field>
         <field name="model">bordado.orden</field>
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_preparar" string="⏱️ Buscar Materiales (15min)" type="object" class="btn-primary" invisible="state != 'borrador'"/>
-                    <button name="action_bordar" string="🧵 Iniciar Máquina" type="object" class="btn-success" invisible="state != 'preparacion'"/>
-                    <button name="action_finalizar" string="✅ Terminar Pedido" type="object" class="btn-warning" invisible="state != 'produccion'"/>
-                    <field name="state" widget="statusbar"/>
+                    <button name="action_preparar" string="⏱️ Iniciar Preparación" type="object" class="btn-primary" invisible="state != 'borrador'"/>
+                    <button name="action_verificar_inicio" string="🚀 INICIAR PROCESO" type="object" class="btn-success" invisible="state != 'preparacion'"/>
+
+                    <button name="action_iniciar_puesta_preparacion" 
+                            string="🔧 INICIAR MONTAJE PUESTA" 
+                            type="object" 
+                            class="btn-warning"
+                            invisible="state != 'produccion' or sub_estado != 'espera'"/>
+
+                    <button name="action_arrancar_maquina" 
+                            string="🧵 ARRANCAR MÁQUINA" 
+                            type="object" 
+                            class="btn-success oe_highlight"
+                            invisible="state != 'produccion' or sub_estado != 'preparando'"/>
+
+                    <button name="action_finalizar_puesta" 
+                            string="✅ FIN DE PUESTA" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state != 'produccion' or sub_estado != 'ejecutando'"/>
+
+                    <button name="action_ir_a_costura" 
+                            string="🪡 IR A COSTURA MANUAL" 
+                            type="object" 
+                            class="btn-info"
+                            invisible="state != 'produccion' or sub_estado != 'espera'"/>
+
+                    <button name="action_retomar_produccion" 
+                            string="🔄 FIN COSTURA / VOLVER" 
+                            type="object" 
+                            class="btn-success"
+                            invisible="state != 'costura'"/>
+                    
+                    <button name="action_pausar_por_prioridad" string="⏸️ PAUSAR (PRIORIDAD ALTA)" type="object" class="btn-warning" invisible="state != 'produccion'"/>
+                    <button name="action_reportar_falla" string="🛑 REPORTAR FALLA" type="object" class="btn-danger" invisible="state != 'produccion'"/>
+                    <button name="action_reanudar" string="▶️ REANUDAR" type="object" class="btn-success" invisible="state != 'detenido'"/>
+                    
+                    <button name="action_pasar_a_limpieza" 
+                            string="🧼 CORTE DE HILOS" 
+                            type="object" 
+                            class="btn-primary" 
+                            invisible="state != 'produccion' or sub_estado != 'espera'"/>
+
+                    <button name="action_finalizar" 
+                            string="🏁 FINALIZAR PEDIDO" 
+                            type="object" 
+                            class="btn-dark" 
+                            invisible="state != 'produccion' or sub_estado != 'espera'" 
+                            confirm="¿Seguro que desea finalizar el pedido?"/>
+                    
+                    <button name="action_terminar_definitivamente" 
+                            string="✅ TERMINAR ORDEN" 
+                            type="object" 
+                            class="btn-success" 
+                            invisible="state != 'limpieza'"/>
+                    
+                    <field name="priority" widget="priority" class="mr-3"/>
+                    <field name="state" widget="statusbar" statusbar_visible="borrador,preparacion,produccion,costura,limpieza,finalizado"/>
                 </header>
+
                 <sheet>
+                    <widget name="web_ribbon" title="URGENTE" bg_color="bg-danger" invisible="priority == '0'"/>
+
                     <div class="oe_title">
                         <h1><field name="name"/></h1>
                     </div>
+
+                    <div class="alert alert-info text-center" role="alert" invisible="state != 'produccion'">
+                        <h2>PUESTA ACTUAL: #<field name="puesta_actual" readonly="1"/></h2>
+                        <h4 invisible="sub_estado != 'preparando'">🔧 Estado: PREPARANDO / CAMBIO DE MAQUINA</h4>
+                        <h4 invisible="sub_estado != 'ejecutando'">🧵 Estado: MÁQUINA BORDANDO</h4>
+                        <h4 invisible="sub_estado != 'espera'">⏳ Estado: ESPERANDO INICIO</h4>
+                        <field name="sub_estado" invisible="1"/>
+                    </div>
+
+                    <div invisible="state != 'costura'" class="alert alert-warning text-center" role="alert">
+                        <h3>🪡 Modo: COSTURA MANUAL</h3>
+                        <p>Máquina liberada. Realizando acabados manuales.</p>
+                    </div>
+
+                    <div class="alert alert-warning text-center" role="alert" invisible="state != 'limpieza'">
+                        <h2>🧼 FASE DE LIMPIEZA</h2>
+                        <h4>Cortando hilos y retirando plásticos.</h4>
+                    </div>
+
+                    <div invisible="state != 'detenido'" class="alert alert-danger text-center" role="alert">
+                        <h3>🛑 MÁQUINA DETENIDA</h3>
+                        <p>Orden en PAUSA o con FALLA.</p>
+                    </div>
+
                     <group>
-                        <group string="Datos">
+                        <group string="Detalles">
                             <field name="cliente"/>
-                            <field name="maquina_id"/>
+                            <field name="puntadas" style="font-size: 16px; font-weight: bold;"/>
+                            <field name="maquina_id" 
+                                   readonly="state in ['borrador', 'preparacion', 'costura', 'detenido', 'finalizado']" 
+                                   required="state == 'produccion'"/>
                             <field name="operario_id" readonly="1"/>
                         </group>
-                        <group string="Documento Digital">
-                            <field name="nombre_archivo" invisible="1"/>
-                            <field name="archivo_pdf" filename="nombre_archivo" widget="pdf_viewer"/>
+                        
+                        <group string="📋 Checklist de Inicio" invisible="state != 'preparacion'">
+                            <div class="alert alert-info" role="alert" style="margin-bottom:0px;">
+                                <div class="d-flex align-items-center">
+                                    <label for="materiales_listos" string="¿Están los Hilos y Telas listos? " class="mr-2"/>
+                                    <field name="materiales_listos" widget="boolean_toggle"/>
+                                </div>
+                            </div>
                         </group>
                     </group>
+
+                    <group string="📸 Foto de la Orden / Diseño">
+                        <field name="imagen_diseno" 
+                               widget="image" 
+                               options="{'size': [0, 0]}" 
+                               style="width: 100%; max-width: 1000px; height: auto; display: block; margin-bottom: 15px;"/>
+                        
+                        <div class="o_row">
+                            <button name="action_ver_imagen" 
+                                    string="🔍 ABRIR FOTO" 
+                                    type="object" 
+                                    class="btn-info" 
+                                    invisible="not imagen_diseno"/>
+                        </div>
+                    </group>
+                    
+                    <group string="📝 Notas para el Siguiente Turno">
+                        <field name="observacion_turno" placeholder="Ej: Se quedó en la puesta 2, falta cambiar hilo rojo..."/>
+                    </group>
+
+                    <notebook>
+                        <page string="⏱️ Tiempos y Operarios">
+                            <field name="actividad_ids">
+                                <list string="Bitácora" decoration-info="tipo_actividad=='preparacion'" decoration-success="tipo_actividad=='bordado'" decoration-warning="tipo_actividad=='limpieza'" decoration-danger="tipo_actividad=='pausa'">
+                                    <field name="numero_puesta" invisible="tipo_actividad != 'bordado'"/>
+                                    <field name="user_id" string="Operario"/>
+                                    <field name="maquina_id"/>
+                                    <field name="tipo_actividad"/>
+                                    <field name="inicio"/>
+                                    <field name="fin"/>
+                                    <field name="duracion" sum="Total Minutos"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="📜 Historial de Incidencias">
+                            <field name="incidencia_ids">
+                                <list editable="bottom">
+                                    <field name="hora_inicio"/>
+                                    <field name="tipo"/>
+                                    <field name="nota"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
                 <chatter/>
             </form>
@@ -40,22 +175,37 @@
                 <field name="name"/>
                 <field name="cliente"/>
                 <field name="state"/>
+                <field name="priority"/>
                 <field name="maquina_id"/>
+                <field name="puntadas"/>
                 <templates>
                     <t t-name="card">
                         <div class="oe_kanban_global_click">
                             <div class="oe_kanban_details">
-                                <strong class="o_kanban_record_title">
-                                    <field name="name"/>
-                                </strong>
+                                <div class="o_kanban_record_top mb-1">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <field name="priority" widget="priority"/>
+                                </div>
+
                                 <div>
-                                    <span class="text-muted">Cliente: </span> <field name="cliente"/>
+                                    <span class="text-muted">Cliente: </span> 
+                                    <field name="cliente"/>
                                 </div>
                                 <div>
-                                    <span class="text-muted">Máquina: </span> <field name="maquina_id"/>
+                                    <span class="text-muted">Máquina: </span> 
+                                    <field name="maquina_id"/>
                                 </div>
+                                <div>
+                                    <span class="text-muted">🧵 Puntadas: </span> 
+                                    <field name="puntadas"/>
+                                </div>
+
                                 <div class="mt-2">
-                                    <field name="state" widget="label_selection" options="{'classes': {'borrador': 'default', 'preparacion': 'warning', 'produccion': 'success', 'finalizado': 'muted'}}"/>
+                                    <field name="state" widget="label_selection" options="{'classes': {'borrador': 'default', 'preparacion': 'warning', 'produccion': 'success', 'costura': 'info', 'detenido': 'danger', 'finalizado': 'muted'}}"/>
                                 </div>
                             </div>
                         </div>
@@ -69,12 +219,29 @@
         <field name="name">bordado.orden.tree</field>
         <field name="model">bordado.orden</field>
         <field name="arch" type="xml">
-            <list>
+            <list decoration-danger="priority=='1'" decoration-muted="state=='finalizado'">
+                <field name="priority" widget="priority" optional="show"/>
                 <field name="name"/>
                 <field name="cliente"/>
                 <field name="maquina_id"/>
-                <field name="state" widget="badge" decoration-info="state == 'preparacion'" decoration-success="state == 'produccion'"/>
+                <field name="puntadas" sum="Total Puntadas"/>
+                <field name="operario_id" string="Responsable"/>
+                <field name="puesta_actual"/>
+                <field name="state" widget="badge" decoration-info="state == 'preparacion'" decoration-success="state == 'produccion'" decoration-danger="state == 'detenido'"/>
             </list>
+        </field>
+    </record>
+
+    <record id="view_bordado_actividad_pivot" model="ir.ui.view">
+        <field name="name">bordado.actividad.pivot</field>
+        <field name="model">bordado.actividad</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Eficiencia">
+                <field name="user_id" type="row"/>      
+                <field name="maquina_id" type="row"/>   
+                <field name="tipo_actividad" type="col"/> 
+                <field name="duracion" type="measure"/> 
+            </pivot>
         </field>
     </record>
 
@@ -84,7 +251,34 @@
         <field name="view_mode">kanban,list,form</field>
     </record>
 
-    <menuitem id="menu_bordado_root" name="Fábrica Bordado" web_icon="mrp,static/description/icon.png"/>
-    <menuitem id="menu_ordenes" name="Órdenes de Trabajo" parent="menu_bordado_root" action="action_bordado_orden" sequence="1"/>
+    <record id="action_reporte_tiempos" model="ir.actions.act_window">
+        <field name="name">Reporte de Eficiencia</field>
+        <field name="res_model">bordado.actividad</field>
+        <field name="view_mode">pivot,graph</field>
+    </record>
+
+    <menuitem id="menu_bordado_root" 
+              name="Fábrica Bordado" 
+              web_icon="bordado_app,static/description/icon.png" 
+              groups="bordado_app.group_bordado_user"/>
+    
+    <menuitem id="menu_ordenes" 
+              name="Órdenes de Trabajo" 
+              parent="menu_bordado_root" 
+              action="action_bordado_orden" 
+              sequence="10"
+              groups="base.group_system"/>
+    
+    <menuitem id="menu_reportes" 
+              name="📊 Reportes Gerenciales" 
+              parent="menu_bordado_root" 
+              sequence="30"
+              groups="base.group_system"/> 
+
+    <menuitem id="menu_reporte_tiempos" 
+              name="Eficiencia de Operarios" 
+              parent="menu_reportes" 
+              action="action_reporte_tiempos"/>
+
   </data>
 </odoo>

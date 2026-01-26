@@ -1,0 +1,90 @@
+<odoo>
+  <data>
+
+    <record id="view_hr_attendance_pivot_bordado" model="ir.ui.view">
+        <field name="name">hr.attendance.pivot.bordado</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <pivot string="Resumen de Horas" display_quantity="0" sample="1">
+                <field name="employee_id" type="row"/>
+                <field name="check_in" interval="day" type="col"/>
+                <field name="worked_hours" type="measure" widget="float_time"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_hr_attendance_list_simple" model="ir.ui.view">
+        <field name="name">hr.attendance.list.simple</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <list string="Detalle Diario" sample="1" decoration-danger="worked_hours &lt; 8">
+                <field name="employee_id" widget="many2one_avatar_user"/>
+                <field name="check_in" string="Entrada"/> 
+                <field name="check_out" string="Salida"/> 
+                <field name="worked_hours" widget="float_time" string="Horas" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_reporte_horas_semanal" model="ir.actions.act_window">
+        <field name="name">📊 Resumen de Horas</field>
+        <field name="res_model">hr.attendance</field>
+        <field name="view_mode">pivot,list</field>
+        
+        <field name="view_id" ref="view_hr_attendance_pivot_bordado"/>
+        
+        <field name="context">{'group_by': 'check_in:month'}</field>
+    </record>
+
+    <menuitem id="menu_reporte_horas_semanal" 
+              name="Resumen de Horas" 
+              parent="menu_reportes" 
+              action="action_reporte_horas_semanal" 
+              sequence="50"
+              groups="base.group_system"/>
+
+
+    <record id="view_bordado_actividad_pivot_orden" model="ir.ui.view">
+        <field name="name">bordado.actividad.pivot.orden</field>
+        <field name="model">bordado.actividad</field>
+        <field name="arch" type="xml">
+            <pivot string="Tiempos por Orden" display_quantity="0" sample="1">
+                
+                <field name="orden_id" type="row"/>
+                
+                <field name="tipo_actividad" type="col"/>
+
+                <field name="duracion" type="measure" widget="float_time"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_bordado_actividad_graph_orden" model="ir.ui.view">
+        <field name="name">bordado.actividad.graph.orden</field>
+        <field name="model">bordado.actividad</field>
+        <field name="arch" type="xml">
+            <graph string="Carga de Trabajo por Orden" type="bar" stacked="True" sample="1">
+                <field name="orden_id"/>
+                <field name="tipo_actividad"/>
+                <field name="duracion" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_analisis_ordenes" model="ir.actions.act_window">
+        <field name="name">⏱️ Tiempos por Orden</field>
+        <field name="res_model">bordado.actividad</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="view_id" ref="view_bordado_actividad_pivot_orden"/>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_analisis_ordenes" 
+              name="Tiempos por Orden" 
+              parent="menu_reportes" 
+              action="action_analisis_ordenes" 
+              sequence="20"
+              groups="base.group_system"/>
+
+  </data>
+</odoo>

@@ -5,27 +5,47 @@
         <field name="model">bordado.incidencia</field>
         <field name="arch" type="xml">
             <form>
-                <header>
-                    <button name="action_resolver" string="Resuelto" type="object" invisible="state == 'resuelto'"/>
-                    <field name="state" widget="statusbar"/>
-                </header>
                 <sheet>
                     <group>
-                        <field name="maquina_id"/>
-                        <field name="tipo"/>
-                        <field name="nota"/>
+                        <group>
+                            <field name="orden_id" readonly="1"/>
+                            <field name="tipo"/>
+                        </group>
+                        <group>
+                            <field name="hora_inicio"/>
+                            <field name="nota"/>
+                        </group>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
+    <record id="view_incidencia_tree" model="ir.ui.view">
+        <field name="name">bordado.incidencia.list</field>
+        <field name="model">bordado.incidencia</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Fallas">
+                <field name="hora_inicio"/>
+                <field name="orden_id"/>
+                <field name="tipo"/>
+                <field name="nota"/>
+            </list>
+        </field>
+    </record>
+
     <record id="action_incidencia" model="ir.actions.act_window">
-        <field name="name">Reportar Falla</field>
+        <field name="name">Reporte de Fallas</field>
         <field name="res_model">bordado.incidencia</field>
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_incidencia" name="Reportar Falla" parent="menu_bordado_root" action="action_incidencia" sequence="99"/>
+    
+    <menuitem id="menu_incidencia" 
+              name="Historial de Fallas" 
+              parent="menu_bordado_root" 
+              action="action_incidencia" 
+              sequence="20"
+              groups="base.group_system"/>
   </data>
 </odoo>

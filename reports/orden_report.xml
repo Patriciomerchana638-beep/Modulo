@@ -1,0 +1,173 @@
+<odoo>
+    <data>
+        <record id="action_report_bordado_orden" model="ir.actions.report">
+            <field name="name">Reporte de Producción</field>
+            <field name="model">bordado.orden</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">bordado_app.report_bordado_orden_template</field>
+            <field name="report_file">bordado_app.report_bordado_orden_template</field>
+            <field name="print_report_name">'Produccion - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="model_bordado_orden"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="report_bordado_orden_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page" style="font-family: Arial, sans-serif;">
+                            
+                            <h2 class="text-center mb-4" style="color: #333;">Reporte de Producción</h2>
+                            
+                            <div class="row mb-4" style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; background-color: #fafafa;">
+                                <div class="col-6">
+                                    <h3 style="margin-top: 0; color: #2c3e50;">Orden: <span t-field="o.name"/></h3>
+                                    <strong>Cliente:</strong> <span t-field="o.cliente"/>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <strong>Estado:</strong> <span t-field="o.state"/><br/>
+                                    <strong>Total Puntadas:</strong> <span t-field="o.puntadas"/><br/>
+                                    <strong>Finalizado el:</strong> 
+                                    <span t-if="o.fecha_fin" t-field="o.fecha_fin" t-options='{"widget": "datetime"}'/>
+                                    <span t-else="" class="text-muted">(En proceso)</span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-6">
+                                    <div style="border: 1px solid #ddd; padding: 0; border-radius: 5px; overflow: hidden;">
+                                        <div style="background-color: #e9ecef; padding: 8px; border-bottom: 1px solid #ddd;">
+                                            <h5 style="margin:0; color: #495057;">Resumen por Puesta</h5>
+                                        </div>
+                                        <table class="table table-sm table-borderless mb-0">
+                                            <thead>
+                                                <tr style="border-bottom: 1px solid #eee; font-size: 0.9em;">
+                                                    <th style="padding-left: 10px;">Puesta</th>
+                                                    <th class="text-right" style="padding-right: 10px;">Tiempo Neto</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="o.get_resumen_puestas()" t-as="res">
+                                                    <td style="padding-left: 10px;">
+                                                        <strong>Puesta #<span t-esc="res[0]"/></strong>
+                                                    </td>
+                                                    <td class="text-right" style="padding-right: 10px;">
+                                                        <span t-esc="res[1]" t-options='{"widget": "float", "precision": 1}'/> min
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div t-if="not o.get_resumen_puestas()" style="padding: 10px;" class="text-muted small">
+                                            * No hay registros de producción efectiva.
+                                        </div>
+                                    </div>
+
+                                    <div t-if="o.get_total_pausas() > 0" style="margin-top: 10px; background-color: #fff3cd; color: #856404; padding: 10px; border: 1px solid #ffeeba; border-radius: 5px;">
+                                        <div class="row">
+                                            <div class="col-8"><strong> Tiempo en Pausa:</strong></div>
+                                            <div class="col-4 text-right">
+                                                <strong><span t-esc="o.get_total_pausas()" t-options='{"widget": "float", "precision": 1}'/> min</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div t-if="o.incidencia_ids" style="border: 1px solid #ffcccc; border-radius: 5px; overflow: hidden;">
+                                        <div style="background-color: #ffe6e6; padding: 8px; border-bottom: 1px solid #ffcccc;">
+                                            <h5 style="margin:0; color: #cc0000;">Incidencias / Retrasos</h5>
+                                        </div>
+                                        <table class="table table-sm table-borderless mb-0">
+                                            <thead>
+                                                <tr style="border-bottom: 1px solid #ffcccc; font-size: 0.9em;">
+                                                    <th style="padding-left: 10px;">Falla</th>
+                                                    <th class="text-center">Fecha</th> <th class="text-right" style="padding-right: 10px;">Tiempo</th> </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="o.incidencia_ids" t-as="falla">
+                                                    <td style="padding-left: 10px;">
+                                                        <span t-field="falla.tipo"/>
+                                                    </td>
+                                                    
+                                                    <td class="text-center">
+                                                        <span t-field="falla.hora_inicio" t-options='{"widget": "datetime", "format": "dd/MM HH:mm"}'/>
+                                                    </td>
+
+                                                    <td class="text-right" style="padding-right: 10px;">
+                                                        <strong><span t-field="falla.duracion" t-options='{"widget": "float", "precision": 1}'/> min</strong>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4>Desglose Detallado de Actividades</h4>
+                            
+                            <table class="table table-sm table-striped table-bordered" style="font-size: 0.85rem; margin-top: 10px;">
+                                <thead>
+                                    <tr style="background-color: #e9ecef; color: #333;">
+                                        <th style="vertical-align: middle;">Actividad</th>
+                                        <th class="text-center" style="vertical-align: middle;">Puesta</th>
+                                        <th class="text-center" style="vertical-align: middle;">Máquina</th>
+                                        <th style="vertical-align: middle;">Operario</th>
+                                        <th class="text-center" style="vertical-align: middle;">Inicio</th>
+                                        <th class="text-center" style="vertical-align: middle;">Fin</th>
+                                        <th class="text-right" style="vertical-align: middle;">Tiempo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.actividad_ids" t-as="line">
+                                        <td><span t-field="line.tipo_actividad"/></td>
+                                        
+                                        <td class="text-center">
+                                            <strong t-if="line.tipo_actividad == 'bordado'">#<span t-field="line.numero_puesta"/></strong>
+                                            <span t-else="">-</span>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <span t-if="line.tipo_actividad in ('preparacion', 'bordado')" t-field="line.maquina_id.name"/>
+                                            <span t-else="" class="text-muted">-</span>
+                                        </td>
+
+                                        <td><span t-field="line.user_id.name"/></td>
+                                        
+                                        <td class="text-center">
+                                            <span t-field="line.inicio" t-options='{"widget": "datetime", "format": "dd/MM HH:mm"}'/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-field="line.fin" t-options='{"widget": "datetime", "format": "dd/MM HH:mm"}'/>
+                                        </td>
+                                        
+                                        <td class="text-right">
+                                            <strong t-if="line.tipo_actividad == 'pausa'" style="color: #dc3545;">
+                                                <span t-field="line.duracion" t-options='{"widget": "float", "precision": 1}'/> min
+                                            </strong>
+                                            <strong t-else="">
+                                                <span t-field="line.duracion" t-options='{"widget": "float", "precision": 1}'/> min
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="row mt-3">
+                                <div class="col-7"></div>
+                                <div class="col-5">
+                                    <div class="text-right p-2" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+                                        <h4 style="margin:0; color: #333;">
+                                            Tiempo Total (Incl. Pausas): 
+                                            <span t-esc="sum(line.duracion for line in o.actividad_ids)" t-options='{"widget": "float", "precision": 1}'/> min
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

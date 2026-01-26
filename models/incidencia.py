@@ -1,20 +1,36 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 class IncidenciaBordado(models.Model):
     _name = 'bordado.incidencia'
-    _description = 'Reporte de Fallas'
-    _inherit = ['mail.thread']
+    _description = 'Reporte de Fallas y Paradas'
 
-    name = fields.Char(string="Código", default="Falla", readonly=True)
-    maquina_id = fields.Many2one('mrp.workcenter', string="Máquina Afectada", required=True)
+    # Relación: Una incidencia pertenece a una Orden
+    orden_id = fields.Many2one('bordado.orden', string="Orden Vinculada")
+    duracion = fields.Float(string="Duración (min)", compute="_compute_duracion", store=True)
+    
     tipo = fields.Selection([
         ('hilo', 'Rotura de Hilo'),
         ('aguja', 'Aguja Rota'),
         ('mecanica', 'Falla Mecánica'),
-        ('limpieza', 'Limpieza')
-    ], string="Tipo", required=True)
-    nota = fields.Text("Detalles")
-    state = fields.Selection([('nuevo', 'Reportado'), ('resuelto', 'Resuelto')], default='nuevo')
+        ('limpieza', 'Limpieza Obligatoria'),
+        ('espera', 'Espera de Material')
+    ], string="Causa", required=True)
+    
+    nota = fields.Text("Observaciones")
+    hora_inicio = fields.Datetime(default=fields.Datetime.now)
+    hora_fin = fields.Datetime(string="Hora Reinicio")
 
-    def action_resolver(self):
-        self.state = 'resuelto'
+    @api.depends('hora_inicio', 'hora_fin')
+    def _compute_duracion(self):
+        for record in self:
+            if record.hora_inicio and record.hora_fin:
+                # Restamos fin - inicio
+                delta = record.hora_fin - record.hora_inicio
+                # Convertimos segundos a minutos
+                record.duracion = delta.total_seconds() / 60
+            else:
+                record.duracion = 0.0
+
+
+
+    

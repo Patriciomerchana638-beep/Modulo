@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="mrp.menu_mrp_root" groups="base.group_system"/>
+
+        <menuitem id="stock.menu_stock_root" groups="base.group_system"/>
+
+        <menuitem id="hr_attendance.menu_hr_attendance_root" groups="base.group_system"/>
+
+        <menuitem id="hr.menu_hr_root" groups="base.group_system"/>
+        
+    </data>
+</odoo>

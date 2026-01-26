@@ -1,0 +1,121 @@
+<odoo>
+    <data>
+        <record id="action_report_asistencia_semanal" model="ir.actions.report">
+            <field name="name">Reporte Semanal de Asistencia (Vista Previa)</field>
+            <field name="model">hr.employee</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">bordado_app.report_asistencia_template</field>
+            <field name="report_file">bordado_app.report_asistencia_template</field>
+            <field name="binding_model_id" ref="hr.model_hr_employee"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="report_asistencia_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="empleado">
+                    <t t-call="web.external_layout">
+                        <div class="page" style="font-family: Arial, sans-serif;">
+                            
+                            <div class="text-center mb-4">
+                                <h2 style="color: #2c3e50;">Reporte Semanal de Asistencia</h2>
+                                <h4 style="color: #666;">Fábrica de Bordado</h4>
+                            </div>
+
+                            <div class="row mb-4" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px;">
+                                <div class="col-2 text-center">
+                                    <img t-if="empleado.image_1920" t-att-src="image_data_uri(empleado.image_1920)" style="max-height: 80px; border-radius: 50%;"/>
+                                    <span t-else="" style="font-size: 50px;">👤</span>
+                                </div>
+                                <div class="col-10">
+                                    <h3 style="margin: 0; color: #333;"><span t-field="empleado.name"/></h3>
+                                    <p t-if="empleado.job_id" style="margin: 0; color: #666;">
+                                        <strong>Cargo:</strong> <span t-field="empleado.job_id.name"/>
+                                    </p>
+                                    <p t-if="empleado.department_id" style="margin: 0; color: #666;">
+                                        <strong>Departamento:</strong> <span t-field="empleado.department_id.name"/>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3"> Registro de Entradas y Salidas (Semana Anterior)</h5>
+                            
+                            <table class="table table-sm table-striped table-bordered">
+                                <thead>
+                                    <tr style="background-color: #e9ecef; color: #333;">
+                                        <th class="text-center">Fecha</th>
+                                        <th class="text-center">Día</th>
+                                        <th class="text-center">Entrada</th>
+                                        <th class="text-center">Salida</th>
+                                        <th class="text-right">Horas Trabajadas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="empleado.get_asistencia_semana_anterior()" t-as="asistencia">
+                                        <td class="text-center">
+                                            <span t-field="asistencia.check_in" t-options='{"widget": "date"}'/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="asistencia.check_in.strftime('%A').capitalize()"/>
+                                        </td>
+                                        <td class="text-center" style="color: #28a745;">
+                                            <span t-field="asistencia.check_in" t-options='{"widget": "datetime", "format": "HH:mm:ss"}'/>
+                                        </td>
+                                        <td class="text-center" style="color: #dc3545;">
+                                            <span t-if="asistencia.check_out" t-field="asistencia.check_out" t-options='{"widget": "datetime", "format": "HH:mm:ss"}'/>
+                                            <span t-else="" style="font-style: italic; color: #999;">(Sin marcar)</span>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong t-if="asistencia.worked_hours > 14" style="color: #dc3545;">
+                                                 <span t-esc="'%.2f' % asistencia.worked_hours"/> h
+                                            </strong>
+                                            <strong t-else="">
+                                                <span t-esc="'%.2f' % asistencia.worked_hours"/> h
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div t-if="not empleado.get_asistencia_semana_anterior()" class="alert alert-warning text-center">
+                                No se encontraron registros de asistencia para la semana pasada.
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-6"></div>
+                                <div class="col-6">
+                                    <div class="text-right p-3" style="background-color: #2c3e50; color: white; border-radius: 5px;">
+                                        <h4 style="margin:0;">
+                                            TOTAL SEMANAL: 
+                                            <span t-esc="'%.2f' % empleado.get_total_horas_semana()"/> Horas
+                                        </h4>
+                                    </div>
+                                    <p t-if="empleado.get_total_horas_semana() > 60" class="text-right text-danger small mt-1">
+                                        * El total incluye registros inusuales (posibles olvidos de salida).
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row" style="margin-top: 100px; page-break-inside: avoid;">
+                                <div class="col-6 text-center">
+                                    <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 10px;">
+                                        <strong>Firma del Empleado</strong><br/>
+                                        <span t-field="empleado.name" style="color: #666; font-size: 0.9em;"/>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-6 text-center">
+                                    <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 10px;">
+                                        <strong>Firma del Administrador</strong><br/>
+                                        <span t-esc="user.name" style="color: #666; font-size: 0.9em;"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <p style="page-break-after:always;"></p> 
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
