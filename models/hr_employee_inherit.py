@@ -44,13 +44,13 @@ class HrEmployee(models.Model):
             return
 
         # 2. Generar el PDF en memoria
-        # Usamos sudo() aquí por si acaso, aunque no es crítico en esta línea
+    
         pdf_content, _ = self.env['ir.actions.report'].sudo()._render_qweb_pdf(
             'bordado_app.action_report_asistencia_semanal', 
             res_ids=empleados.ids
         )
 
-        # 3. Crear el archivo adjunto en Odoo (CON SUPERPODERES)
+        # 3. Crear el archivo adjunto en Odoo 
         nombre_archivo = f'Reporte_Asistencia_Semanal_{fields.Date.today()}.pdf'
         
         # AGREGAMOS .sudo() ANTES DE .create
@@ -63,7 +63,7 @@ class HrEmployee(models.Model):
             'mimetype': 'application/pdf',
         })
 
-        # 4. Preparar y enviar el correo (CON SUPERPODERES)
+       
         # Forzamos tu correo personal
         destinatario = 'merchana638@gmail.com'
 
@@ -79,5 +79,4 @@ class HrEmployee(models.Model):
             'attachment_ids': [(4, adjunto.id)],
         }
         
-        # AGREGAMOS .sudo() AQUÍ TAMBIÉN
         self.env['mail.mail'].sudo().create(mail_values).send()

@@ -6,13 +6,12 @@ class ActividadBordado(models.Model):
 
     orden_id = fields.Many2one('bordado.orden', string="Orden")
     
-    # IMPORTANTE: Aquí guardamos quién hizo ESTA parte del trabajo
     user_id = fields.Many2one('res.users', string="Operario", default=lambda self: self.env.user, readonly=True)
     
-    # Quitamos cualquier default aquí, lo controlaremos con la función de abajo
+
     numero_puesta = fields.Integer(string="N° Puesta")
     
-    # --- AQUÍ ESTÁ LA ACTUALIZACIÓN (Se agregó Limpieza) ---
+    #  ACTUALIZACIÓN 
     tipo_actividad = fields.Selection([
         ('preparacion', ' Cambio / Preparación'),
         ('bordado', ' Bordando'),
@@ -27,7 +26,7 @@ class ActividadBordado(models.Model):
     duracion = fields.Float(string="Minutos", compute="_compute_duracion", store=True)
     maquina_id = fields.Many2one('mrp.workcenter', string="Máquina")
 
-    # --- LÓGICA ACTUALIZADA ---
+  
     @api.onchange('tipo_actividad')
     def _onchange_tipo_actividad(self):
         """

@@ -66,7 +66,7 @@
                                         </td>
                                         <td class="text-right">
                                             <strong t-if="asistencia.worked_hours > 14" style="color: #dc3545;">
-                                                 <span t-esc="'%.2f' % asistencia.worked_hours"/> h
+                                                <span t-esc="'%.2f' % asistencia.worked_hours"/> h
                                             </strong>
                                             <strong t-else="">
                                                 <span t-esc="'%.2f' % asistencia.worked_hours"/> h

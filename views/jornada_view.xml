@@ -25,23 +25,31 @@
                     <hr invisible="not esta_trabajando"/>
 
                     <div invisible="not esta_trabajando" style="margin-top: 20px; margin-bottom: 40px;">
-                        <h2 class="text-center" style="color: #555;">📂 ¿Qué deseas hacer hoy?</h2>
+                        <h2 class="text-center" style="color: #555;">Gestión de Órdenes y Fallas</h2>
                         <br/>
-                        <div class="row">
-                            <div class="col-6 text-center">
-                                <button name="%(bordado_app.action_bordado_orden)d" 
-                                        type="action" 
-                                        string="🧵 Ver Órdenes de Trabajo" 
+                        <div class="row g-2">
+                            <div class="col-4 text-center">
+                                <button name="%(bordado_app.action_bordado_orden)d"
+                                        type="action"
+                                        string="🧵 Ver Órdenes de Trabajo"
                                         class="btn-primary"
-                                        style="width: 90%; height: 100px; font-size: 20px; border-radius: 10px;"/>
+                                        style="width: 95%; height: 100px; font-size: 18px; border-radius: 10px;"/>
                             </div>
 
-                            <div class="col-6 text-center">
-                                <button name="%(bordado_app.action_incidencia)d" 
-                                        type="action" 
-                                        string="⚠️ Historial de Fallas" 
+                            <div class="col-4 text-center">
+                                <button name="%(bordado_app.action_incidencia)d"
+                                        type="action"
+                                        string="⚠️ Historial de Fallas"
                                         class="btn-warning"
-                                        style="width: 90%; height: 100px; font-size: 20px; border-radius: 10px; color: black;"/>
+                                        style="width: 95%; height: 100px; font-size: 18px; border-radius: 10px; color: black;"/>
+                            </div>
+
+                            <div class="col-4 text-center">
+                                <button name="%(bordado_app.action_bordado_limpieza)d"
+                                        type="action"
+                                        string="🧹 Limpieza de Máquinas"
+                                        class="btn-success"
+                                        style="width: 95%; height: 100px; font-size: 18px; border-radius: 10px;"/>
                             </div>
                         </div>
                     </div>

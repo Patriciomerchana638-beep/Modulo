@@ -1,4 +1,3 @@
-# UBICACIÓN: wizard/falla_wizard.py
 from odoo import models, fields, api
 
 class BordadoFallaWizard(models.TransientModel):
@@ -6,31 +5,35 @@ class BordadoFallaWizard(models.TransientModel):
     _description = 'Asistente para Reportar Fallas'
 
     orden_id = fields.Many2one('bordado.orden', string="Orden", readonly=True)
-    
-    # Usamos los mismos campos que tu modelo de Incidencia
+
+    # El timestamp exacto de la falla viene desde orden_pedido.py via context.
+    # Se usa como hora_inicio de la incidencia para eliminar el desfase temporal.
+    hora_inicio_falla = fields.Datetime(string="Hora de Inicio de Falla", readonly=True)
+
     tipo = fields.Selection([
         ('hilo', 'Rotura de Hilo'),
         ('aguja', 'Aguja Rota'),
         ('mecanica', 'Falla Mecánica'),
         ('limpieza', 'Limpieza Obligatoria'),
         ('espera', 'Espera de Material'),
-        ('otro', 'Otro')
+        ('otro', 'Otro'),
     ], string="Causa", required=True)
-    
+
     nota = fields.Text(string="Observaciones", required=True)
 
     def action_confirmar_falla(self):
         """
-        Guarda la incidencia en el historial y cierra la ventana.
-        El tiempo ya se está contando en 'orden_pedido.py', así que aquí solo registramos la causa.
+        Registra la causa de la falla en bordado.incidencia usando el timestamp
+        exacto del momento en que el operario pulsó 'Reportar Falla', no el momento
+        de confirmación del wizard. Esto garantiza consistencia con bordado.actividad.
         """
-        # Creamos el registro en TU tabla de historial
+        hora_inicio = self.hora_inicio_falla or fields.Datetime.now()
+
         self.env['bordado.incidencia'].create({
             'orden_id': self.orden_id.id,
             'tipo': self.tipo,
             'nota': self.nota,
-            'hora_inicio': fields.Datetime.now(),
-            # 'state': 'abierta' # Importante para saber cual cerrar luego
+            'hora_inicio': hora_inicio,
         })
-        
+
         return {'type': 'ir.actions.act_window_close'}

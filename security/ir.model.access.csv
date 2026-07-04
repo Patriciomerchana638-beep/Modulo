@@ -4,3 +4,6 @@ access_bordado_incidencia,access_bordado_incidencia,model_bordado_incidencia,bas
 access_bordado_control,access_bordado_control,model_bordado_control_asistencia,base.group_user,1,1,1,1
 access_bordado_actividad,access_bordado_actividad,model_bordado_actividad,base.group_user,1,1,1,1
 access_bordado_falla_wizard,bordado.falla.wizard,model_bordado_falla_wizard,base.group_user,1,1,1,1
+access_bordado_limpieza,access_bordado_limpieza,model_bordado_limpieza,base.group_user,1,1,1,0
+access_bordado_limpieza_inicio_wizard,bordado.limpieza.inicio.wizard,model_bordado_limpieza_inicio_wizard,base.group_user,1,1,1,1
+access_bordado_limpieza_fin_wizard,bordado.limpieza.fin.wizard,model_bordado_limpieza_fin_wizard,base.group_user,1,1,1,1

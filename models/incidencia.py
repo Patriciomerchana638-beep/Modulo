@@ -13,7 +13,8 @@ class IncidenciaBordado(models.Model):
         ('aguja', 'Aguja Rota'),
         ('mecanica', 'Falla Mecánica'),
         ('limpieza', 'Limpieza Obligatoria'),
-        ('espera', 'Espera de Material')
+        ('espera', 'Espera de Material'),
+        ('otro', 'Otro'),
     ], string="Causa", required=True)
     
     nota = fields.Text("Observaciones")

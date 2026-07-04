@@ -181,41 +181,49 @@ class OrdenPedido(models.Model):
     # 1. REPORTAR FALLA 
  
     def action_reportar_falla(self):
-        
         self.ensure_one()
-        
-        # PASO 1: Detenemos el reloj de lo que se estaba haciendo (Bordado/Preparación)
+
+        # PASO 1: Capturamos el timestamp exacto del momento de la falla.
+        # Esta variable se comparte con el wizard para eliminar el desfase temporal
+        # entre la actividad de parada y el registro de la incidencia.
+        timestamp_falla = fields.Datetime.now()
+
+        # PASO 2: Detenemos el reloj de lo que se estaba haciendo (Bordado/Preparación)
         self._cerrar_actividad_abierta()
-        
-        # PASO 2: Cambiamo estado visual
+
+        # PASO 3: Cambiamos estado visual
         self.state = 'detenido'
-        
-        #  Iniciamos el cronómetro de "Tiempo Muerto"
-        # Usamos 'pausa' para que el sistema sepa que es tiempo improductivo
+
+        # PASO 4: Iniciamos el cronómetro de "Tiempo Muerto" usando el timestamp exacto
         self.env['bordado.actividad'].create({
             'orden_id': self.id,
             'numero_puesta': self.puesta_actual,
-            'tipo_actividad': 'falla', 
+            'tipo_actividad': 'falla',
             'maquina_id': self.maquina_id.id,
             'user_id': self.env.user.id,
-            'inicio': fields.Datetime.now()
+            'inicio': timestamp_falla,
         })
-        
-        # PASO 4: Mensaje en el panel de chatter
+
+        # PASO 5: Mensaje en el panel de chatter
         self.message_post(
             body="MÁQUINA DETENIDA POR FALLA TÉCNICA - Cronómetro de parada iniciado.",
             message_type="comment",
             subtype_xmlid="mail.mt_comment"
         )
-        
-        # PASO 5: Abrimos la ventana (Wizard) para clasificar la falla
+
+        # PASO 6: Abrimos el wizard pasando el timestamp exacto de la falla.
+        # El wizard usará este valor como hora_inicio de la incidencia,
+        # garantizando consistencia entre bordado.actividad y bordado.incidencia.
         return {
             'name': 'Reportar Falla Técnica',
             'type': 'ir.actions.act_window',
-            'res_model': 'bordado.falla.wizard', 
+            'res_model': 'bordado.falla.wizard',
             'view_mode': 'form',
             'target': 'new',
-            'context': {'default_orden_id': self.id}
+            'context': {
+                'default_orden_id': self.id,
+                'default_hora_inicio_falla': fields.Datetime.to_string(timestamp_falla),
+            },
         }
 
 
@@ -245,44 +253,37 @@ class OrdenPedido(models.Model):
         self.message_post(body="⏸️ Orden pausada por: PRIORIDAD ALTA.")
 
    
-    # 3. REANUDAR (ACTUALIZADO PARA CERRAR INCIDENCIAS)
-   
+    # 3. REANUDAR
+
     def action_reanudar(self):
         """
-        Cierra tiempos, cierra incidencias abiertas y vuelve a trabajar.
+        Cierra el cronómetro de parada, cierra la incidencia abierta si existe,
+        y devuelve la orden a 'espera' para que el operario decida el siguiente
+        paso (montaje o arranque directo). No crea actividades automáticamente
+        para evitar registros de tipo 'bordado' con duración cero.
         """
         for orden in self:
             # 1. Cierra el cronómetro de tiempo muerto (Pausa/Falla)
             orden._cerrar_actividad_abierta()
 
-            # 2. Busca si hay una incidencia ABIERTA en el historial para cerrarla
+            # 2. Cierra la incidencia abierta más reciente, si existe
             incidencia = self.env['bordado.incidencia'].search([
                 ('orden_id', '=', orden.id),
-                ('hora_fin', '=', False) # Busca la que no tenga hora fin
+                ('hora_fin', '=', False),
             ], limit=1)
-            
-            mensaje = "▶️ PAUSA FINALIZADA. Producción reanudada."
-            
-            # Si se encontra una incidencia abierta, la cerramos
+
+            mensaje = "▶️ PAUSA FINALIZADA. Seleccione el siguiente paso para continuar."
+
             if incidencia:
                 incidencia.write({'hora_fin': fields.Datetime.now()})
-                mensaje = f"✅ Falla resuelta ({incidencia.tipo}). Retomando producción."
+                mensaje = f"✅ Falla resuelta ({incidencia.tipo}). Máquina liberada."
 
-            # 3. Volvemos al estado de Producción
+            # 3. Volvemos a 'espera': el operario inicia el siguiente paso conscientemente.
+            # Esto previene la creación de registros 'bordado' de duración cero
+            # que contaminan las métricas de eficiencia.
             orden.state = 'produccion'
-            orden.sub_estado = 'ejecutando' # Asumimos que la máquina arranca
-            
-            # 4. Iniciamos el cronómetro PRODUCTIVO (Bordando)
-            orden.env['bordado.actividad'].create({
-                'orden_id': orden.id,
-                'numero_puesta': orden.puesta_actual,
-                'tipo_actividad': 'bordado', # Volvemos a sumar tiempo bueno
-                'maquina_id': orden.maquina_id.id,
-                'user_id': orden.env.user.id,
-                'inicio': fields.Datetime.now()
-            })
-            
-            # 5. Publicamos el mensaje correcto (Falla resuelta o Pausa fin)
+            orden.sub_estado = 'espera'
+
             orden.message_post(body=mensaje)
 
   
@@ -385,7 +386,7 @@ class OrdenPedido(models.Model):
         """
         resumen = {}
         for linea in self.actividad_ids:
-            # Condición estricta: Debe tener número de puesta Y NO SER PAUSA
+            
             if linea.numero_puesta > 0 and linea.tipo_actividad != 'pausa':
                 p = linea.numero_puesta
                 if p not in resumen:

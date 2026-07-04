@@ -20,15 +20,15 @@ class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
 
     def unlink(self):
-        validar_solo_admin(self.env)  # <--- Usamos la función global
+        validar_solo_admin(self.env)  #  Usamos la función global
         return super(HrAttendance, self).unlink()
 
     def write(self, vals):
-        # Admin puede todo
+        # Administrador 
         if self.env.user.has_group('base.group_system'):
             return super(HrAttendance, self).write(vals)
         
-        # Bloqueo para mortales
+        # Operario
         if 'check_in' in vals:
             raise UserError(_("🛑 No puedes cambiar la hora de entrada."))
         if 'check_out' in vals:
@@ -42,7 +42,7 @@ class BordadoOrden(models.Model):
     _inherit = 'bordado.orden'
 
     def unlink(self):
-        validar_solo_admin(self.env)  # <--- Usamos la función global
+        validar_solo_admin(self.env) 
         return super(BordadoOrden, self).unlink()
 
 
@@ -50,7 +50,7 @@ class BordadoActividad(models.Model):
     _inherit = 'bordado.actividad'
 
     def unlink(self):
-        validar_solo_admin(self.env)  # <--- Usamos la función global
+        validar_solo_admin(self.env)  
         return super(BordadoActividad, self).unlink()
 
 
@@ -58,7 +58,7 @@ class BordadoIncidencia(models.Model):
     _inherit = 'bordado.incidencia'
 
     def unlink(self):
-        validar_solo_admin(self.env)  # <--- Usamos la función global
+        validar_solo_admin(self.env)  
         return super(BordadoIncidencia, self).unlink()
 
 
@@ -66,5 +66,5 @@ class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
     def unlink(self):
-        validar_solo_admin(self.env)  # <--- Usamos la función global
+        validar_solo_admin(self.env)  
         return super(HrEmployee, self).unlink()

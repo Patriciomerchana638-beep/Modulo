@@ -9,6 +9,8 @@
         'data/data.xml',
         'data/cron_jobs.xml',
         'views/orden_pedido_view.xml',
+        'views/limpieza_view.xml',
+        'views/limpieza_wizard_view.xml',
         'views/jornada_view.xml',
         'views/incidencia_view.xml',
         'views/reporte_view.xml',
@@ -16,9 +18,9 @@
         'reports/orden_report.xml',
         'reports/asistencia_report.xml',
         'views/falla_wizard_view.xml',
-    ],  # <--- Aquí se cierra la lista de datos. ¡No borres esta coma!
+    ],
 
-    'license': 'LGPL-3',  # <--- La licencia va AQUÍ FUERA (hermana de 'data')
+    'license': 'LGPL-3',  # <--- licencia del módulo
 
     # 'demo/demo.xml',
     'application': True,
