@@ -27,7 +27,7 @@
     </record>
 
     <record id="action_reporte_horas_semanal" model="ir.actions.act_window">
-        <field name="name">📊 Resumen de Horas</field>
+        <field name="name"> Resumen de Horas</field>
         <field name="res_model">hr.attendance</field>
         <field name="view_mode">pivot,list</field>
         

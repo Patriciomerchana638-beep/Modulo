@@ -2,9 +2,6 @@
 <odoo>
   <data>
 
-    <!-- ══════════════════════════════════════════════
-         SEARCH VIEW
-    ══════════════════════════════════════════════ -->
     <record id="view_bordado_limpieza_search" model="ir.ui.view">
       <field name="name">bordado.limpieza.search</field>
       <field name="model">bordado.limpieza</field>
@@ -18,9 +15,6 @@
       </field>
     </record>
 
-    <!-- ══════════════════════════════════════════════
-         KANBAN DASHBOARD — TARJETAS POR MÁQUINA
-    ══════════════════════════════════════════════ -->
     <record id="view_bordado_limpieza_kanban" model="ir.ui.view">
       <field name="name">bordado.limpieza.kanban</field>
       <field name="model">bordado.limpieza</field>
@@ -81,14 +75,14 @@
                           type="object"
                           class="btn btn-warning w-100 fw-bold"
                           style="height: 64px; font-size: 19px; border-radius: 10px;">
-                    🚀 INICIAR
+                     INICIAR
                   </button>
                   <button t-if="record.state.raw_value === 'en_proceso'"
                           name="action_abrir_wizard_fin"
                           type="object"
                           class="btn btn-success w-100 fw-bold"
                           style="height: 64px; font-size: 19px; border-radius: 10px;">
-                    ✅ FINALIZAR
+                     FINALIZAR
                   </button>
                   <div t-if="record.state.raw_value === 'finalizado'"
                        class="text-center text-success fw-bold py-2"
@@ -104,9 +98,7 @@
       </field>
     </record>
 
-    <!-- ══════════════════════════════════════════════
-         FORM VIEW (acceso admin para crear / editar)
-    ══════════════════════════════════════════════ -->
+   
     <record id="view_bordado_limpieza_form" model="ir.ui.view">
       <field name="name">bordado.limpieza.form</field>
       <field name="model">bordado.limpieza</field>
@@ -138,9 +130,7 @@
       </field>
     </record>
 
-    <!-- ══════════════════════════════════════════════
-         LIST VIEW
-    ══════════════════════════════════════════════ -->
+    
     <record id="view_bordado_limpieza_list" model="ir.ui.view">
       <field name="name">bordado.limpieza.list</field>
       <field name="model">bordado.limpieza</field>
@@ -158,21 +148,17 @@
       </field>
     </record>
 
-    <!-- ══════════════════════════════════════════════
-         ACTION — muestra solo el día actual por defecto
-    ══════════════════════════════════════════════ -->
+   
     <record id="action_bordado_limpieza" model="ir.actions.act_window">
-      <field name="name">🧹 Dashboard de Limpieza</field>
+      <field name="name"> Dashboard de Limpieza</field>
       <field name="res_model">bordado.limpieza</field>
       <field name="view_mode">kanban,list,form</field>
       <field name="domain">[]</field>
     </record>
 
-    <!-- ══════════════════════════════════════════════
-         MENUITEM (visible para operarios con jornada)
-    ══════════════════════════════════════════════ -->
+    
     <menuitem id="menu_limpieza"
-              name="🧹 Limpieza de Máquinas"
+              name="Limpieza de Máquinas"
               parent="menu_bordado_root"
               action="action_bordado_limpieza"
               sequence="15"

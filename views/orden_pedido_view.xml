@@ -270,7 +270,7 @@
               groups="base.group_system"/>
     
     <menuitem id="menu_reportes" 
-              name="📊 Reportes Gerenciales" 
+              name="Reportes Gerenciales" 
               parent="menu_bordado_root" 
               sequence="30"
               groups="base.group_system"/> 

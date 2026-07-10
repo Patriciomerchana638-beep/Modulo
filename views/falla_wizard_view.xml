@@ -12,7 +12,7 @@
                     <field name="nota" placeholder="Describe el problema..."/>
                 </group>
                 <footer>
-                    <button string="🚨 Registrar Falla" name="action_confirmar_falla" type="object" class="btn-danger"/>
+                    <button string="Registrar Falla" name="action_confirmar_falla" type="object" class="btn-danger"/>
                     <button string="Cancelar" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>

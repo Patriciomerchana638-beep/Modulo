@@ -2,9 +2,6 @@
 <odoo>
   <data>
 
-    <!-- ══════════════════════════════════════════════
-         WIZARD 1 — INICIO DE LIMPIEZA
-    ══════════════════════════════════════════════ -->
     <record id="view_limpieza_inicio_wizard_form" model="ir.ui.view">
       <field name="name">bordado.limpieza.inicio.wizard.form</field>
       <field name="model">bordado.limpieza.inicio.wizard</field>
@@ -35,7 +32,7 @@
 
           </sheet>
           <footer>
-            <button string="🚀 CONFIRMAR INICIO"
+            <button string="CONFIRMAR INICIO"
                     name="action_confirmar_inicio"
                     type="object"
                     class="btn-warning btn-lg"
@@ -46,9 +43,7 @@
       </field>
     </record>
 
-    <!-- ══════════════════════════════════════════════
-         WIZARD 2 — FIN DE LIMPIEZA
-    ══════════════════════════════════════════════ -->
+
     <record id="view_limpieza_fin_wizard_form" model="ir.ui.view">
       <field name="name">bordado.limpieza.fin.wizard.form</field>
       <field name="model">bordado.limpieza.fin.wizard</field>
