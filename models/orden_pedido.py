@@ -5,6 +5,7 @@ class OrdenPedido(models.Model):
     _name = 'bordado.orden'
     _description = 'Orden de Producción Avanzada'
     _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'fecha_fin desc nulls last, id desc'
 
     temp_inicio_costura = fields.Datetime(string="Temp Inicio Costura") # Campo temporal para control interno
 
@@ -293,6 +294,7 @@ class OrdenPedido(models.Model):
         """Cierra la orden directamente (camino normal)"""
         self.ensure_one()
         self._cerrar_actividad_abierta()
+        self.fecha_fin = fields.Datetime.now()
         self.state = 'finalizado'
         self.message_post(body="✅ Orden Finalizada (Sin registro de Corte de Hilos).")
 

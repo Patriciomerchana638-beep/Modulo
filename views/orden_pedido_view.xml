@@ -219,7 +219,8 @@
         <field name="name">bordado.orden.tree</field>
         <field name="model">bordado.orden</field>
         <field name="arch" type="xml">
-            <list decoration-danger="priority=='1'" decoration-muted="state=='finalizado'">
+            <list decoration-danger="priority=='1'" decoration-muted="state=='finalizado'"
+                  default_order="fecha_fin desc">
                 <field name="priority" widget="priority" optional="show"/>
                 <field name="name"/>
                 <field name="cliente"/>
@@ -227,6 +228,7 @@
                 <field name="puntadas" sum="Total Puntadas"/>
                 <field name="operario_id" string="Responsable"/>
                 <field name="puesta_actual"/>
+                <field name="fecha_fin" optional="show"/>
                 <field name="state" widget="badge" decoration-info="state == 'preparacion'" decoration-success="state == 'produccion'" decoration-danger="state == 'detenido'"/>
             </list>
         </field>
